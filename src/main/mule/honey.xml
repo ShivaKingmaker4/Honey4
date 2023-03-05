@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ed233e17-487f-4a8b-863a-f2a5e10e5c42" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="3ea49164-01da-4838-b888-6936562053a6" >
+		<vm:connection />
+		<vm:queues >
+			<vm:queue queueName="Honey" queueType="PERSISTENT" />
+		</vm:queues>
+	</vm:config>
+	<flow name="honeyFlow" doc:id="78fbd69c-1989-4047-bd28-40c3332f9101" >
+		<http:listener doc:name="Listener" doc:id="b52d97d3-f655-4e0a-8722-86868a481cb1" config-ref="HTTP_Listener_config" path="/Honey"/>
+		<set-payload value="#[attributes.queryParams.message]" doc:name="Set Payload" doc:id="32558e6b-7265-457c-b573-ae2d2226a038" />
+		<vm:publish doc:name="Publish" doc:id="df86844c-c974-4362-913e-4fd48c22f09d" config-ref="VM_Config" sendCorrelationId="AUTO" queueName="Honey"/>
+		<set-payload value='#["message sent"]' doc:name="Set Payload" doc:id="65312293-a361-4786-a7e5-65d80063f9b7" />
+	</flow>
+	<flow name="honeyFlow1" doc:id="c78eef7b-22c8-4aaf-944d-fb93750a76cc" >
+		<http:listener doc:name="Listener" doc:id="83a9356a-9fe8-4ff3-b9af-ab3cd4f61481" config-ref="HTTP_Listener_config" path="/received"/>
+		<vm:consume doc:name="Consume" doc:id="69cc102c-bbb3-4580-8e37-b41e2a80e8c5" config-ref="VM_Config" queueName="Honey"/>
+	</flow>
+</mule>
